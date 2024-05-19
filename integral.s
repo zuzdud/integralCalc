@@ -1,43 +1,67 @@
 .global _start
 
 .section .data
-	a: .float 2
-	b: .float 10
-	n: .float 1000
-	two: .float 2
+	a: .float 3 # left limit
+	b: .float 10 # right limit
+	n: .float 1000 # rectangles number
+	in: .int 1000
+	# some needed constants
+	two: .float 2 
 	six: .float 6
-	z: .float 0
+	
 .section .text
 
 _start:
 
-finit
+	finit # initialize fpu
 
-#count step
-fld a
-fld b
-fsubp
-fdiv n # r7 = i=(b-a)/n
+	mov in, %eax # initialize rectangles counter
 
-fld a # r6 = a
-fld a 
-fadd %ST(2), %ST(0) # r5 = a+i
+	fldz # reserve place for cumulative area in fpu stack (r7)
 
-fld %ST(1)
-fadd %ST(1)
-fdiv two #r4 = x
+	# calculate step
+	fld a 
+	fld b
+	fsubp 
+	fdiv n # r6 = i=(b-a)/n
 
-fld %ST(0)
-fmul %ST(1), %ST(0)
-fsub six #r3 pierwsza czesc wyniku
+	fld a # r5 = a
 
-fld %ST(1)
-fsub two # r2 druga czesc wyniku
+	fld a 
+	fadd %ST(2), %ST(0) # r4 = a+i
 
-fld %ST(1)
-fdiv %ST(1), %ST(0) # podzielic
+	# loop should start here
+	loop:
+		# calculate x
+		fld %ST(1)
+		fadd %ST(1)
+		fdiv two # r3 = x
 
-fmul %ST(6), %ST(0) #pomnozyc razy i wynik w r1
-fadd %ST(0)
+		#caluclate f(x) = (x^2 - 6)/(x-2)
+		fld %ST(0)
+		fmul %ST(1), %ST(0)
+		fsub six # r2 = x^2 - 6
 
-fmul z, %ST(4)
+		fld %ST(1)
+		fsub two # r1 = x-2
+
+		fdivrp # r2 = f(x)
+
+		# calculate area F(x) * i
+		fmul %ST(4), %ST(0) # r2 = area
+
+		faddp %ST(0), %ST(5) # add area to cumulative area
+
+		fstp %ST(0) # pop stack
+		
+		#go to next rectangle
+		fadd %ST(2), %ST(0)
+		fincstp 
+		fadd %ST(1), %ST(0)
+		fdecstp
+
+		dec %eax # decrement rectangle counter
+		jnz loop # jump if counter not 0
+	 
+nop # i dont know its just here
+
