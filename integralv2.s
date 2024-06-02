@@ -1,7 +1,7 @@
 .global integralv2
 
 .section .data
-        steps: .int 1000
+        steps: .int 500
 
 	.align 32
 	a: .double 3
@@ -16,7 +16,7 @@
 	six: .double 6, 6
 
 	.align 32
-	dsteps: .double 1000, 1000
+	dsteps: .double 500, 500
 .section .text
 
 integralv2:

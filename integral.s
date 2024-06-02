@@ -1,13 +1,18 @@
 .global integral
 
 .section .data
-	a: .double 3 # left limit
-	b: .double 10 # right limit
-	n: .double 1000 # rectangles number
+	.align 32
+	a: .float 3 # left limit
+	.align 32
+	b: .float 10 # right limit
+	.align 32
+	n: .float 1000 # rectangles number
 	in: .int 1000
 	# some needed constants
-	two: .double 2 
-	six: .double 6
+	.align 32
+	two: .float 2 
+	.align 32
+	six: .float 6
 	
 .section .text
 
