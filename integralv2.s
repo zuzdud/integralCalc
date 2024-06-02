@@ -1,4 +1,4 @@
-.global _start
+.global integralv2
 
 .section .data
         in: .int 1000
@@ -23,7 +23,7 @@
 
 .section .text
 
-_start:
+integralv2:
 	mov in, %eax
 	movaps v4, %xmm6 	
 
@@ -65,5 +65,5 @@ _start:
 		dec %eax
 		jnz loop
 	
-nop # i dont know its just here
-
+# nop # i dont know its just here
+ret

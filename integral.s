@@ -1,4 +1,4 @@
-.global _start
+.global integral
 
 .section .data
 	a: .float 3 # left limit
@@ -11,7 +11,7 @@
 	
 .section .text
 
-_start:
+integral:
 
 	finit # initialize fpu
 
@@ -63,5 +63,5 @@ _start:
 		dec %eax # decrement rectangle counter
 		jnz loop # jump if counter not 0
 	 
-nop # i dont know its just here
-
+# nop # i dont know its just here
+ret
