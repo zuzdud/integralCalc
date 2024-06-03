@@ -7,8 +7,9 @@
 	b: .float 10 # right limit
 	.align 32
 	n: .float 1000 # rectangles number
-	in: .int 1000
-	# some needed constants
+	
+	steps: .int 1000
+	
 	.align 32
 	two: .float 2 
 	.align 32
@@ -20,7 +21,7 @@ integral:
 
 	finit # initialize fpu
 
-	mov in, %eax # initialize rectangles counter
+	mov steps, %eax # initialize rectangles counter
 
 	fldz # reserve place for cumulative area in fpu stack (r7)
 
@@ -68,5 +69,4 @@ integral:
 		dec %eax # decrement rectangle counter
 		jnz loop # jump if counter not 0
 	 
-# nop # i dont know its just here
 ret

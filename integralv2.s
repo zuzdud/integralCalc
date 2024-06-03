@@ -17,19 +17,20 @@
 
 	.align 32
 	dsteps: .double 500, 500
+
 .section .text
 
 integralv2:
-	mov steps, %eax
+	mov steps, %eax # initialize rectangle counter
 	xorpd %xmm6, %xmm6 # xmm6 = cumulative area
 
-	movlpd b, %xmm0 # 10, 0
-	movlpd a, %xmm1 # 3, 0
-	subpd %xmm1, %xmm0 # 7, 0
-	divpd two, %xmm0 # 3.5, 0
-	addpd %xmm1, %xmm0 # 6.5, 0
-	movhpd b, %xmm0 # 6.5, 10
-	movlhps %xmm0, %xmm1 # 3, 6.5
+	movlpd b, %xmm0 # xmm0 = b, 0
+	movlpd a, %xmm1 # xmm1 = a, 0
+	subpd %xmm1, %xmm0 # xmm0 = b-a, 0
+	divpd two, %xmm0 # xmm0 = (b-a)/2, 0
+	addpd %xmm1, %xmm0 # xmm0 = (b-a)/2 + a, 0
+	movhpd b, %xmm0 # xmm0 = (b-a)/2 + a, b
+	movlhps %xmm0, %xmm1 # xmm1 = a, (b-a)/2 + a
  	
 	subpd %xmm1, %xmm0 
 	divpd dsteps, %xmm0 # xmm0 = i = (b-a)/n
@@ -55,13 +56,12 @@ integralv2:
 
 		mulpd %xmm0, %xmm4 # xmm4 = area
 		
-		addpd %xmm4, %xmm6	
+		addpd %xmm4, %xmm6 # add to cumulative area
 		
-		addpd %xmm0, %xmm1
+		addpd %xmm0, %xmm1 # go to next rectangle
 		addpd %xmm0, %xmm2
 
-		dec %eax
-		jnz loop
+		dec %eax # decrement counter
+		jnz loop # jump to loop if counter not zero
 	
-# nop # i dont know its just here
 ret
