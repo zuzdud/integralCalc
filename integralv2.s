@@ -1,65 +1,75 @@
 .global integralv2
 
 .section .data
-        steps: .int 500
+        steps: .int 250
 
 	.align 32
-	a: .double 3
+	a: .float 3
 
 	.align 32
-	b: .double 10
+	b: .float 10
 
         .align 32
-	two: .double 2, 2
+	two: .float 2, 2, 2, 2
         
 	.align 32
-	six: .double 6, 6
+	four: .float 4, 4, 4, 4
 
 	.align 32
-	dsteps: .double 500, 500
+	six: .float 6, 6, 6, 6
+		
+	.align 32
+	dsteps: .float 1000
 
 .section .text
 
 integralv2:
+# shufps
 	mov steps, %eax # initialize rectangle counter
 	xorpd %xmm6, %xmm6 # xmm6 = cumulative area
 
-	movlpd b, %xmm0 # xmm0 = b, 0
-	movlpd a, %xmm1 # xmm1 = a, 0
-	subpd %xmm1, %xmm0 # xmm0 = b-a, 0
-	divpd two, %xmm0 # xmm0 = (b-a)/2, 0
-	addpd %xmm1, %xmm0 # xmm0 = (b-a)/2 + a, 0
-	movhpd b, %xmm0 # xmm0 = (b-a)/2 + a, b
-	movlhps %xmm0, %xmm1 # xmm1 = a, (b-a)/2 + a
- 	
-	subpd %xmm1, %xmm0 
-	divpd dsteps, %xmm0 # xmm0 = i = (b-a)/n
-	
-	movapd %xmm1, %xmm2
-	addpd %xmm0, %xmm2 # xmm2 = a+i
-        
-	loop:
-		movapd %xmm1, %xmm3 
-		addpd %xmm2, %xmm3
-		divpd two, %xmm3 # xmm3 = x
-		
-		movapd %xmm3, %xmm4
-		mulpd %xmm3, %xmm4
-		subpd six, %xmm4 # xmm4 = x^2 - 6
+	movaps b, %xmm0 # b
+	movaps a, %xmm1 # a
+	subps %xmm1, %xmm0 # b-a
+	divps dsteps, %xmm0 # i = (b-a)/n
+	shufps $0x00, %xmm0, %xmm0 # xmm0 = i 
+	movaps a, %xmm1 # a
+	shufps $0x00, %xmm1, %xmm1 # xmm1 = a
+	movaps %xmm0, %xmm2 # xmm2 = i
+	pslldq $4, %xmm2
+	addps %xmm2, %xmm1
+	pslldq $4, %xmm2
+	addps %xmm2, %xmm1
+	pslldq $4, %xmm2
+        addps %xmm2, %xmm1 # xmm1 = a, a+i, a+2i, a+3i
+	movaps %xmm1, %xmm2 # a
+	addps %xmm0, %xmm1 # b
 
-		movapd %xmm1, %xmm5
-		subpd two, %xmm5 # xmm5 = x - 2
+	movaps %xmm0, %xmm7
+	mulps four, %xmm7
 		
-		divpd %xmm5, %xmm4 # xmm4 = f(x)
+	loop:
+		movaps %xmm1, %xmm3 
+		addps %xmm2, %xmm3
+		divps two, %xmm3 # xmm3 = x
+		
+		movaps %xmm3, %xmm4
+		mulps %xmm3, %xmm4
+		subps six, %xmm4 # xmm4 = x^2 - 6
+
+		movaps %xmm3, %xmm5
+		subps two, %xmm5 # xmm5 = x - 2
+		
+		divps %xmm5, %xmm4 # xmm4 = f(x)
 
 		# calculate area F(x) * i
 
-		mulpd %xmm0, %xmm4 # xmm4 = area
+		mulps %xmm0, %xmm4 # xmm4 = area
 		
-		addpd %xmm4, %xmm6 # add to cumulative area
+		addps %xmm4, %xmm6 # add to cumulative area
 		
-		addpd %xmm0, %xmm1 # go to next rectangle
-		addpd %xmm0, %xmm2
+		addps %xmm7, %xmm1 # go to next rectangle
+		addps %xmm7, %xmm2
 
 		dec %eax # decrement counter
 		jnz loop # jump to loop if counter not zero
