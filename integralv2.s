@@ -24,7 +24,7 @@
 .section .text
 
 integralv2:
-# shufps
+
 	mov steps, %eax # initialize rectangle counter
 	xorpd %xmm6, %xmm6 # xmm6 = cumulative area
 
@@ -42,36 +42,40 @@ integralv2:
 	addps %xmm2, %xmm1
 	pslldq $4, %xmm2
         addps %xmm2, %xmm1 # xmm1 = a, a+i, a+2i, a+3i
-	movaps %xmm1, %xmm2 # a
-	addps %xmm0, %xmm1 # b
 
-	movaps %xmm0, %xmm7
-	mulps four, %xmm7
+	movaps %xmm0, %xmm2
+	divps two, %xmm2
+	addps %xmm2, %xmm1
+
+	movaps %xmm0, %xmm5
+	mulps four, %xmm5
 		
 	loop:
-		movaps %xmm1, %xmm3 
-		addps %xmm2, %xmm3
-		divps two, %xmm3 # xmm3 = x
+		# movaps %xmm1, %xmm2 # xmm2 = x
 		
-		movaps %xmm3, %xmm4
-		mulps %xmm3, %xmm4
-		subps six, %xmm4 # xmm4 = x^2 - 6
+		movaps %xmm1, %xmm2
+		mulps %xmm1, %xmm2
+		subps six, %xmm2 # xmm2 = x^2 - 6
 
-		movaps %xmm3, %xmm5
-		subps two, %xmm5 # xmm5 = x - 2
+		movaps %xmm1, %xmm3
+		subps two, %xmm3 # xmm3 = x - 2
 		
-		divps %xmm5, %xmm4 # xmm4 = f(x)
+		divps %xmm3, %xmm2 # xmm2 = f(x)
 
 		# calculate area F(x) * i
 
-		mulps %xmm0, %xmm4 # xmm4 = area
+		mulps %xmm0, %xmm2 # xmm2 = area
 		
-		addps %xmm4, %xmm6 # add to cumulative area
+		addps %xmm2, %xmm6 # add to cumulative area
 		
-		addps %xmm7, %xmm1 # go to next rectangle
-		addps %xmm7, %xmm2
+		addps %xmm5, %xmm1 # get next rectangles
+		#addps %xmm7, %xmm2
 
 		dec %eax # decrement counter
 		jnz loop # jump to loop if counter not zero
-	
+
+	#xorps %xmm7, %xmm7	
+	haddps %xmm6, %xmm6
+	haddps %xmm6, %xmm6
+
 ret
